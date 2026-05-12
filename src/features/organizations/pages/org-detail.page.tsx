@@ -21,7 +21,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
-import { formatDate, isExpired } from '@/lib/date/format-date';
+import { formatDate, formatDateTime, isExpired } from '@/lib/date/format-date';
 import { getErrorMessage } from '@/lib/api/errors';
 import { RoleGate } from '@/lib/role/require-role';
 import { getFeatureLabel } from '@/features/features/feature-i18n';
@@ -122,7 +122,7 @@ export function OrgDetailPage(): React.ReactElement {
               {STATUS_LABEL[org.data.status]}
             </Badge>
             <span className="ml-2 text-xs">
-              ID: {org.data.id} · Yaratilgan: {formatDate(org.data.createdAt)}
+              ID: {org.data.id} · Yaratilgan: {formatDateTime(org.data.createdAt)}
             </span>
           </CardDescription>
         </CardHeader>

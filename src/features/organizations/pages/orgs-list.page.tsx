@@ -9,7 +9,7 @@ import {
   type ColumnDef,
 } from '@/components/data-table/data-table';
 import { useDebounce } from '@/hooks/use-debounce';
-import { formatDate } from '@/lib/date/format-date';
+import { formatDateTime } from '@/lib/date/format-date';
 import { getErrorMessage } from '@/lib/api/errors';
 import { useAdminOrgs } from '../hooks/use-organizations';
 import type {
@@ -98,7 +98,7 @@ export function OrgsListPage(): React.ReactElement {
         header: 'Yaratilgan',
         cell: ({ row }) => (
           <span className="text-xs text-muted-foreground">
-            {formatDate(row.original.createdAt)}
+            {formatDateTime(row.original.createdAt)}
           </span>
         ),
       },

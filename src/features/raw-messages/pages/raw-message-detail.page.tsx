@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
-import { formatDate } from '@/lib/date/format-date';
+import { formatDateTime } from '@/lib/date/format-date';
 import { getErrorMessage } from '@/lib/api/errors';
 import { useAdminRawMessage } from '../hooks/use-raw-messages';
 import type { RawMessageStatus } from '../api/raw-messages.api';
@@ -103,7 +103,7 @@ export function RawMessageDetailPage(): React.ReactElement {
             </Badge>
           </CardTitle>
           <CardDescription>
-            {formatDate(r.createdAt)} · {r.source} · {r.messageType}
+            {formatDateTime(r.createdAt)} · {r.source} · {r.messageType}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -165,7 +165,7 @@ export function RawMessageDetailPage(): React.ReactElement {
             label="Yangilangan"
             value={
               <span className="text-xs text-muted-foreground">
-                {formatDate(r.updatedAt)}
+                {formatDateTime(r.updatedAt)}
               </span>
             }
           />

@@ -14,6 +14,25 @@ export function formatDate(input: string | Date | null, locale = 'uz'): string {
   return format(date, 'dd MMM yyyy', { locale: resolveLocale(locale) });
 }
 
+/**
+ * Like `formatDate` but with second-precision time appended. The admin
+ * surfaces a lot of audit / created-at / updated-at columns — a plain
+ * date drops too much info when you're chasing a duplicate event or
+ * timing a Gemini retry, so the dashboard renders these via
+ * `formatDateTime` instead.
+ */
+export function formatDateTime(
+  input: string | Date | null,
+  locale = 'uz',
+): string {
+  if (!input) return '—';
+  const date = typeof input === 'string' ? parseISO(input) : input;
+  if (!isValid(date)) return '—';
+  return format(date, 'dd MMM yyyy, HH:mm:ss', {
+    locale: resolveLocale(locale),
+  });
+}
+
 export function formatRelative(input: string | Date | null, locale = 'uz'): string {
   if (!input) return '—';
   const date = typeof input === 'string' ? parseISO(input) : input;

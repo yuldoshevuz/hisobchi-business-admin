@@ -6,7 +6,7 @@ import {
   DataTable,
   type ColumnDef,
 } from '@/components/data-table/data-table';
-import { formatDate } from '@/lib/date/format-date';
+import { formatDateTime } from '@/lib/date/format-date';
 import { getErrorMessage } from '@/lib/api/errors';
 import { useAdminRawMessages } from '../hooks/use-raw-messages';
 import type {
@@ -145,7 +145,7 @@ export function RawMessagesListPage(): React.ReactElement {
         header: 'Yaratilgan',
         cell: ({ row }) => (
           <span className="text-xs text-muted-foreground">
-            {formatDate(row.original.createdAt)}
+            {formatDateTime(row.original.createdAt)}
           </span>
         ),
       },

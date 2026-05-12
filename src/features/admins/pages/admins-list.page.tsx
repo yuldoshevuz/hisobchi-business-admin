@@ -21,7 +21,7 @@ import {
   DataTable,
   type ColumnDef,
 } from '@/components/data-table/data-table';
-import { formatDate } from '@/lib/date/format-date';
+import { formatDateTime } from '@/lib/date/format-date';
 import { getErrorMessage } from '@/lib/api/errors';
 import { RoleGate } from '@/lib/role/require-role';
 import { useAuthStore, type AdminRole } from '@/stores/auth.store';
@@ -86,7 +86,7 @@ export function AdminsListPage(): React.ReactElement {
         header: 'Yaratilgan',
         cell: ({ row }) => (
           <span className="text-xs text-muted-foreground">
-            {formatDate(row.original.createdAt)}
+            {formatDateTime(row.original.createdAt)}
           </span>
         ),
       },
