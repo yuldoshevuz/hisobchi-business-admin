@@ -1,6 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, ImageIcon, Maximize2, Mic } from 'lucide-react';
+import {
+  ArrowLeft,
+  ExternalLink,
+  ImageIcon,
+  Pause,
+  Play,
+} from 'lucide-react';
+import Lightbox from 'yet-another-react-lightbox';
+import Zoom from 'yet-another-react-lightbox/plugins/zoom';
+import 'yet-another-react-lightbox/styles.css';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,7 +19,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
 import { env } from '@/config/env';
 import { formatDateTime } from '@/lib/date/format-date';
@@ -88,36 +96,7 @@ function MediaPreview({
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
 
   if (isAudio) {
-    return (
-      <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <Mic className="h-5 w-5" />
-        </div>
-        <div className="min-w-0 flex-1 space-y-1.5">
-          <div className="flex items-center gap-2 text-xs">
-            <span className="font-medium">Ovozli xabar</span>
-            {mimeType ? (
-              <span className="text-muted-foreground">· {mimeType}</span>
-            ) : null}
-          </div>
-          <audio
-            controls
-            src={absolute}
-            preload="metadata"
-            className="h-8 w-full"
-          />
-        </div>
-        <a
-          href={absolute}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Faylni alohida ochish"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
-        >
-          <ExternalLink className="h-4 w-4" />
-        </a>
-      </div>
-    );
+    return <AdminVoicePlayer src={absolute} mimeType={mimeType} />;
   }
 
   if (isImage) {
@@ -135,24 +114,20 @@ function MediaPreview({
             className="aspect-[4/3] w-full object-cover"
             loading="lazy"
           />
-          <div className="pointer-events-none absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-background/85 text-foreground shadow-sm backdrop-blur">
-            <Maximize2 className="h-4 w-4" />
-          </div>
           {mimeType ? (
             <div className="absolute bottom-2 left-2 rounded-md bg-background/85 px-2 py-0.5 text-xs text-muted-foreground backdrop-blur">
               {mimeType}
             </div>
           ) : null}
         </button>
-        <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-          <DialogContent className="max-w-5xl border-none bg-background p-2">
-            <img
-              src={absolute}
-              alt="raw_message media"
-              className="max-h-[85vh] w-full rounded-md object-contain"
-            />
-          </DialogContent>
-        </Dialog>
+        <Lightbox
+          open={lightboxOpen}
+          close={() => setLightboxOpen(false)}
+          slides={[{ src: absolute, alt: 'raw_message media' }]}
+          plugins={[Zoom]}
+          carousel={{ finite: true }}
+          render={{ buttonPrev: () => null, buttonNext: () => null }}
+        />
       </>
     );
   }
@@ -174,6 +149,157 @@ function MediaPreview({
         <span className="text-muted-foreground">· {mimeType}</span>
       ) : null}
     </a>
+  );
+}
+
+/**
+ * Custom voice player for raw_message audio. Native `<audio>` ref
+ * under the hood (so Telegram OGG/opus plays without a Web Audio
+ * decode dance) + Tailwind UI. Same pattern as the frontend mini-app's
+ * `VoiceWavePlayer`; kept here as a sibling so the admin doesn't
+ * grow a cross-app component.
+ */
+function AdminVoicePlayer({
+  src,
+  mimeType,
+}: {
+  src: string;
+  mimeType: string | null;
+}): React.ReactElement {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const progressRef = useRef<HTMLDivElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    function onLoaded(): void {
+      if (audio && Number.isFinite(audio.duration)) {
+        setDuration(audio.duration);
+      }
+    }
+    function onTime(): void {
+      if (!audio) return;
+      setCurrentTime(audio.currentTime);
+      if (
+        (duration === 0 || !Number.isFinite(duration)) &&
+        Number.isFinite(audio.duration)
+      ) {
+        setDuration(audio.duration);
+      }
+    }
+    function onEnded(): void {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    }
+    function onPlay(): void {
+      setIsPlaying(true);
+    }
+    function onPause(): void {
+      setIsPlaying(false);
+    }
+    audio.addEventListener('loadedmetadata', onLoaded);
+    audio.addEventListener('durationchange', onLoaded);
+    audio.addEventListener('timeupdate', onTime);
+    audio.addEventListener('ended', onEnded);
+    audio.addEventListener('play', onPlay);
+    audio.addEventListener('pause', onPause);
+    return () => {
+      audio.removeEventListener('loadedmetadata', onLoaded);
+      audio.removeEventListener('durationchange', onLoaded);
+      audio.removeEventListener('timeupdate', onTime);
+      audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('play', onPlay);
+      audio.removeEventListener('pause', onPause);
+    };
+  }, [duration]);
+
+  function toggle(): void {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audio.paused) {
+      void audio.play();
+    } else {
+      audio.pause();
+    }
+  }
+
+  function seekFromEvent(e: React.MouseEvent<HTMLDivElement>): void {
+    const audio = audioRef.current;
+    const bar = progressRef.current;
+    if (!audio || !bar || !Number.isFinite(audio.duration)) return;
+    const rect = bar.getBoundingClientRect();
+    const ratio = Math.min(
+      Math.max((e.clientX - rect.left) / rect.width, 0),
+      1,
+    );
+    audio.currentTime = ratio * audio.duration;
+    setCurrentTime(audio.currentTime);
+  }
+
+  function fmt(seconds: number): string {
+    if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  const progressPct =
+    duration > 0 ? Math.min((currentTime / duration) * 100, 100) : 0;
+
+  return (
+    <div className="flex max-w-xl items-center gap-3 rounded-lg border bg-muted/40 p-3">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={isPlaying ? 'pause' : 'play'}
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
+      >
+        {isPlaying ? (
+          <Pause className="h-5 w-5" />
+        ) : (
+          <Play className="ml-0.5 h-5 w-5" fill="currentColor" />
+        )}
+      </button>
+      <div className="min-w-0 flex-1 space-y-1.5">
+        <div className="flex items-center gap-2 text-xs">
+          <span className="font-medium">Ovozli xabar</span>
+          {mimeType ? (
+            <span className="text-muted-foreground">· {mimeType}</span>
+          ) : null}
+        </div>
+        <div
+          ref={progressRef}
+          role="slider"
+          aria-label="Audio progress"
+          aria-valuemin={0}
+          aria-valuemax={duration || 0}
+          aria-valuenow={currentTime}
+          onClick={seekFromEvent}
+          className="relative h-1.5 w-full cursor-pointer overflow-hidden rounded-full bg-muted-foreground/20"
+        >
+          <div
+            className="h-full rounded-full bg-primary transition-[width] duration-100"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+      </div>
+      <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+        {fmt(currentTime)} / {fmt(duration)}
+      </span>
+      <a
+        href={src}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Faylni alohida ochish"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+      >
+        <ExternalLink className="h-4 w-4" />
+      </a>
+      <audio ref={audioRef} src={src} preload="metadata" className="hidden" />
+    </div>
   );
 }
 
