@@ -250,7 +250,7 @@ function AdminVoicePlayer({
     duration > 0 ? Math.min((currentTime / duration) * 100, 100) : 0;
 
   return (
-    <div className="flex max-w-xl items-center gap-3 rounded-lg border bg-muted/40 p-3">
+    <div className="flex max-w-xl items-center gap-3">
       <button
         type="button"
         onClick={toggle}
@@ -263,31 +263,26 @@ function AdminVoicePlayer({
           <Play className="ml-0.5 h-5 w-5" fill="currentColor" />
         )}
       </button>
-      <div className="min-w-0 flex-1 space-y-1.5">
-        <div className="flex items-center gap-2 text-xs">
-          <span className="font-medium">Ovozli xabar</span>
-          {mimeType ? (
-            <span className="text-muted-foreground">· {mimeType}</span>
-          ) : null}
-        </div>
+      <div
+        ref={progressRef}
+        role="slider"
+        aria-label="Audio progress"
+        aria-valuemin={0}
+        aria-valuemax={duration || 0}
+        aria-valuenow={currentTime}
+        onClick={seekFromEvent}
+        className="relative h-3 min-w-0 flex-1 cursor-pointer overflow-hidden rounded-full bg-muted-foreground/20"
+      >
         <div
-          ref={progressRef}
-          role="slider"
-          aria-label="Audio progress"
-          aria-valuemin={0}
-          aria-valuemax={duration || 0}
-          aria-valuenow={currentTime}
-          onClick={seekFromEvent}
-          className="relative h-1.5 w-full cursor-pointer overflow-hidden rounded-full bg-muted-foreground/20"
-        >
-          <div
-            className="h-full rounded-full bg-primary transition-[width] duration-100"
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
+          className="h-full rounded-full bg-primary transition-[width] duration-100"
+          style={{ width: `${progressPct}%` }}
+        />
       </div>
       <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
         {fmt(currentTime)} / {fmt(duration)}
+        {mimeType ? (
+          <span className="ml-2 text-muted-foreground/60">· {mimeType}</span>
+        ) : null}
       </span>
       <a
         href={src}
