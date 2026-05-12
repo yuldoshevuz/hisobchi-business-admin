@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
+import { env } from '@/config/env';
 import { formatDateTime } from '@/lib/date/format-date';
 import { getErrorMessage } from '@/lib/api/errors';
 import { useAdminRawMessage } from '../hooks/use-raw-messages';
@@ -54,6 +55,60 @@ function JsonBlock({ value }: { value: unknown }): React.ReactElement {
     <pre className="max-h-[400px] overflow-auto rounded-md border bg-muted/40 p-3 text-xs">
       {JSON.stringify(value, null, 2)}
     </pre>
+  );
+}
+
+/**
+ * Inline media renderer for voice / image raw_messages. The stored
+ * `mediaUrl` is a relative path like `/uploads/2026/04/abc.ogg` that
+ * the backend serves as a static asset (see `main.ts useStaticAssets`),
+ * so we just prefix it with the API base URL. The MIME type is used
+ * to pick `<audio>` vs `<img>`; falls back to `messageType` when the
+ * row pre-dates the migration that started persisting MIME.
+ */
+function MediaPreview({
+  url,
+  mimeType,
+  messageType,
+}: {
+  url: string;
+  mimeType: string | null;
+  messageType: string;
+}): React.ReactElement {
+  const absolute = url.startsWith('http')
+    ? url
+    : `${env.BACKEND_BASE_URL}${url}`;
+  const isAudio =
+    (mimeType ?? '').startsWith('audio/') || messageType === 'voice';
+  const isImage =
+    (mimeType ?? '').startsWith('image/') || messageType === 'image';
+
+  return (
+    <div className="space-y-2">
+      {isAudio ? (
+        <audio controls src={absolute} className="w-full" preload="metadata" />
+      ) : null}
+      {isImage ? (
+        <img
+          src={absolute}
+          alt="raw_message media"
+          className="max-h-[480px] rounded-md border object-contain"
+        />
+      ) : null}
+      <div className="text-xs">
+        <a
+          href={absolute}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-mono text-primary underline-offset-4 hover:underline"
+        >
+          {url}
+        </a>
+        {mimeType ? (
+          <span className="text-muted-foreground"> · {mimeType}</span>
+        ) : null}
+      </div>
+    </div>
   );
 }
 
@@ -203,12 +258,11 @@ export function RawMessageDetailPage(): React.ReactElement {
             label="Media"
             value={
               r.mediaUrl ? (
-                <span className="text-xs">
-                  <span className="font-mono">{r.mediaUrl}</span>
-                  {r.mimeType ? (
-                    <span className="text-muted-foreground"> · {r.mimeType}</span>
-                  ) : null}
-                </span>
+                <MediaPreview
+                  url={r.mediaUrl}
+                  mimeType={r.mimeType}
+                  messageType={r.messageType}
+                />
               ) : (
                 <span className="text-xs text-muted-foreground">—</span>
               )
