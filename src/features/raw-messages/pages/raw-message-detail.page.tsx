@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ExternalLink, ImageIcon, Maximize2, Mic } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
 import { env } from '@/config/env';
 import { formatDateTime } from '@/lib/date/format-date';
@@ -63,8 +65,9 @@ function JsonBlock({ value }: { value: unknown }): React.ReactElement {
  * `mediaUrl` is a relative path like `/uploads/2026/04/abc.ogg` that
  * the backend serves as a static asset (see `main.ts useStaticAssets`),
  * so we just prefix it with the API base URL. The MIME type is used
- * to pick `<audio>` vs `<img>`; falls back to `messageType` when the
- * row pre-dates the migration that started persisting MIME.
+ * to pick the voice card vs the image thumbnail (image opens a
+ * shadcn Dialog lightbox); falls back to `messageType` when the row
+ * pre-dates the migration that started persisting MIME.
  */
 function MediaPreview({
   url,
@@ -82,33 +85,95 @@ function MediaPreview({
     (mimeType ?? '').startsWith('audio/') || messageType === 'voice';
   const isImage =
     (mimeType ?? '').startsWith('image/') || messageType === 'image';
+  const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
 
-  return (
-    <div className="space-y-2">
-      {isAudio ? (
-        <audio controls src={absolute} className="w-full" preload="metadata" />
-      ) : null}
-      {isImage ? (
-        <img
-          src={absolute}
-          alt="raw_message media"
-          className="max-h-[480px] rounded-md border object-contain"
-        />
-      ) : null}
-      <div className="text-xs">
+  if (isAudio) {
+    return (
+      <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <Mic className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="font-medium">Ovozli xabar</span>
+            {mimeType ? (
+              <span className="text-muted-foreground">· {mimeType}</span>
+            ) : null}
+          </div>
+          <audio
+            controls
+            src={absolute}
+            preload="metadata"
+            className="h-8 w-full"
+          />
+        </div>
         <a
           href={absolute}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-mono text-primary underline-offset-4 hover:underline"
+          aria-label="Faylni alohida ochish"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
         >
-          {url}
+          <ExternalLink className="h-4 w-4" />
         </a>
-        {mimeType ? (
-          <span className="text-muted-foreground"> · {mimeType}</span>
-        ) : null}
       </div>
-    </div>
+    );
+  }
+
+  if (isImage) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setLightboxOpen(true)}
+          aria-label="Rasmni to'liq ko'rish"
+          className="group relative block max-w-md overflow-hidden rounded-lg border bg-muted/40 transition-shadow hover:shadow-md"
+        >
+          <img
+            src={absolute}
+            alt="raw_message media"
+            className="aspect-[4/3] w-full object-cover"
+            loading="lazy"
+          />
+          <div className="pointer-events-none absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-background/85 text-foreground shadow-sm backdrop-blur">
+            <Maximize2 className="h-4 w-4" />
+          </div>
+          {mimeType ? (
+            <div className="absolute bottom-2 left-2 rounded-md bg-background/85 px-2 py-0.5 text-xs text-muted-foreground backdrop-blur">
+              {mimeType}
+            </div>
+          ) : null}
+        </button>
+        <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+          <DialogContent className="max-w-5xl border-none bg-background p-2">
+            <img
+              src={absolute}
+              alt="raw_message media"
+              className="max-h-[85vh] w-full rounded-md object-contain"
+            />
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+
+  // Unknown media type — surface the path as a link so the file is
+  // still reachable without breaking the layout.
+  return (
+    <a
+      href={absolute}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2 text-xs hover:bg-muted"
+    >
+      <ImageIcon className="h-4 w-4 text-muted-foreground" />
+      <span className="font-mono text-primary underline-offset-4 hover:underline">
+        {url}
+      </span>
+      {mimeType ? (
+        <span className="text-muted-foreground">· {mimeType}</span>
+      ) : null}
+    </a>
   );
 }
 
