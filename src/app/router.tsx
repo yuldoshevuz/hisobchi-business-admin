@@ -8,6 +8,13 @@ import { DashboardPage } from '@/features/dashboard/pages/dashboard.page';
 import { FeaturesListPage } from '@/features/features/pages/features-list.page';
 import { OrgsListPage } from '@/features/organizations/pages/orgs-list.page';
 import { OrgDetailPage } from '@/features/organizations/pages/org-detail.page';
+import { PlatformUserDetailPage } from '@/features/platform-users/pages/platform-user-detail.page';
+import { PlatformUsersListPage } from '@/features/platform-users/pages/platform-users-list.page';
+import { BotTemplateDetailPage } from '@/features/bot-templates/pages/bot-template-detail.page';
+import { BotTemplatesListPage } from '@/features/bot-templates/pages/bot-templates-list.page';
+import { BroadcastsListPage } from '@/features/broadcasts/pages/broadcasts-list.page';
+import { BroadcastComposerPage } from '@/features/broadcasts/pages/broadcast-composer.page';
+import { BroadcastDetailPage } from '@/features/broadcasts/pages/broadcast-detail.page';
 import { PlanDetailPage } from '@/features/plans/pages/plan-detail.page';
 import { PlansListPage } from '@/features/plans/pages/plans-list.page';
 import { RawMessageDetailPage } from '@/features/raw-messages/pages/raw-message-detail.page';
@@ -50,6 +57,20 @@ export const router = createBrowserRouter([
           // Organizations
           { path: 'organizations', element: <OrgsListPage /> },
           { path: 'organizations/:id', element: <OrgDetailPage /> },
+
+          // Platform users (end-users of the bot / mini-app)
+          { path: 'platform-users', element: <PlatformUsersListPage /> },
+          { path: 'platform-users/:id', element: <PlatformUserDetailPage /> },
+
+          // Bot message templates (admin-editable canned replies)
+          { path: 'bot-templates', element: <BotTemplatesListPage /> },
+          { path: 'bot-templates/:id', element: <BotTemplateDetailPage /> },
+
+          // Broadcasts (admin-composed bulk messages)
+          { path: 'broadcasts', element: <BroadcastsListPage /> },
+          { path: 'broadcasts/new', element: <BroadcastComposerPage /> },
+          { path: 'broadcasts/:id', element: <BroadcastDetailPage /> },
+          { path: 'broadcasts/:id/edit', element: <BroadcastComposerPage /> },
 
           // System categories
           { path: 'system-categories', element: <SystemCategoriesListPage /> },

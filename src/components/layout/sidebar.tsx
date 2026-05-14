@@ -6,9 +6,12 @@ import {
   ClipboardList,
   CreditCard,
   LayoutDashboard,
+  Megaphone,
+  MessageSquare,
   ShieldCheck,
   Sparkles,
   Tag,
+  Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AdminRole } from '@/stores/auth.store';
@@ -23,10 +26,13 @@ interface NavEntry {
 
 const NAV: NavEntry[] = [
   { to: '/dashboard', label: 'Boshqaruv paneli', icon: LayoutDashboard },
+  { to: '/platform-users', label: 'Foydalanuvchilar', icon: Users },
   { to: '/organizations', label: 'Tashkilotlar', icon: Building2 },
   { to: '/plans', label: 'Tariflar', icon: CreditCard },
   { to: '/features', label: 'Funksiyalar', icon: Sparkles },
   { to: '/system-categories', label: 'Tizim kategoriyalari', icon: Tag },
+  { to: '/bot-templates', label: 'Bot xabarlari', icon: MessageSquare },
+  { to: '/broadcasts', label: 'Ommaviy xabarlar', icon: Megaphone },
   { to: '/raw-messages', label: 'AI xabarlar', icon: Bot },
   {
     to: '/admins',
