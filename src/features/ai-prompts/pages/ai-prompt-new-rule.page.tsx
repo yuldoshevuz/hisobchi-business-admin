@@ -44,14 +44,18 @@ const TARGET_GROUPS: Array<{
     ],
   },
   {
-    title: 'Maxsus amallar',
-    hint: 'So‘rov, tahrirlash, bekor qilish va kontakt yaratish',
+    title: "So‘rov (query) pipeline",
+    hint: "3 ta sub-prompt: router (mode tanlash) → answer (context'dan) yoki plan (dataRequest)",
     keys: [
-      'stage2.query',
-      'stage2.update',
-      'stage2.void',
-      'stage2.create_contact',
+      'stage2.query.router',
+      'stage2.query.answer',
+      'stage2.query.plan',
     ],
+  },
+  {
+    title: 'Maxsus amallar',
+    hint: 'Tahrirlash, bekor qilish va kontakt yaratish',
+    keys: ['stage2.update', 'stage2.void', 'stage2.create_contact'],
   },
   {
     title: 'Yakuniy javob',
