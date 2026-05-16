@@ -10,6 +10,9 @@ import { OrgsListPage } from '@/features/organizations/pages/orgs-list.page';
 import { OrgDetailPage } from '@/features/organizations/pages/org-detail.page';
 import { PlatformUserDetailPage } from '@/features/platform-users/pages/platform-user-detail.page';
 import { PlatformUsersListPage } from '@/features/platform-users/pages/platform-users-list.page';
+import { AiPromptDetailPage } from '@/features/ai-prompts/pages/ai-prompt-detail.page';
+import { AiPromptNewRulePage } from '@/features/ai-prompts/pages/ai-prompt-new-rule.page';
+import { AiPromptsListPage } from '@/features/ai-prompts/pages/ai-prompts-list.page';
 import { BotTemplateDetailPage } from '@/features/bot-templates/pages/bot-template-detail.page';
 import { BotTemplatesListPage } from '@/features/bot-templates/pages/bot-templates-list.page';
 import { BroadcastsListPage } from '@/features/broadcasts/pages/broadcasts-list.page';
@@ -65,6 +68,13 @@ export const router = createBrowserRouter([
           // Bot message templates (admin-editable canned replies)
           { path: 'bot-templates', element: <BotTemplatesListPage /> },
           { path: 'bot-templates/:id', element: <BotTemplateDetailPage /> },
+
+          // AI prompts (admin-editable Gemini system prompts)
+          { path: 'ai-prompts', element: <AiPromptsListPage /> },
+          // `new-rule` MUST come before the dynamic `:id` route so
+          // react-router matches the static segment first.
+          { path: 'ai-prompts/new-rule', element: <AiPromptNewRulePage /> },
+          { path: 'ai-prompts/:id', element: <AiPromptDetailPage /> },
 
           // Broadcasts (admin-composed bulk messages)
           { path: 'broadcasts', element: <BroadcastsListPage /> },

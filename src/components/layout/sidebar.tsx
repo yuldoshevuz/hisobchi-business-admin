@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   Bot,
+  BrainCircuit,
   Building2,
   CalendarRange,
   ClipboardList,
@@ -32,6 +33,7 @@ const NAV: NavEntry[] = [
   { to: '/features', label: 'Funksiyalar', icon: Sparkles },
   { to: '/system-categories', label: 'Tizim kategoriyalari', icon: Tag },
   { to: '/bot-templates', label: 'Bot xabarlari', icon: MessageSquare },
+  { to: '/ai-prompts', label: 'AI promptlari', icon: BrainCircuit },
   { to: '/broadcasts', label: 'Ommaviy xabarlar', icon: Megaphone },
   { to: '/raw-messages', label: 'AI xabarlar', icon: Bot },
   {
