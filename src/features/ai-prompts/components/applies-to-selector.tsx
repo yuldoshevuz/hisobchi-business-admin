@@ -66,12 +66,16 @@ export function AppliesToSelector({
                   type="checkbox"
                   checked={checked}
                   onChange={() => toggle(key)}
-                  className="h-3.5 w-3.5"
+                  className="h-3.5 w-3.5 flex-shrink-0"
                 />
-                <span>{shortTargetLabel(key)}</span>
-                <code className="ml-auto text-[10px] text-muted-foreground">
-                  {key}
-                </code>
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate font-medium leading-tight">
+                    {shortTargetLabel(key)}
+                  </span>
+                  <code className="truncate text-[10px] leading-tight text-muted-foreground">
+                    {key}
+                  </code>
+                </div>
               </label>
             );
           })}
