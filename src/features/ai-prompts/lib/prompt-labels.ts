@@ -23,6 +23,8 @@ export const PROMPT_LABELS: Record<string, string> = {
   'shared.category_hint_rule': 'Kategoriya qoidasi (Category hint)',
   'shared.pii_rule': "Maxfiy ma‘lumot (PII) qoidasi",
   'shared.multi_tx_rule': 'Bir nechta tranzaksiya qoidasi',
+  'shared.user_clarification_rule':
+    "Foydalanuvchiga savol matni qoidasi (User clarification)",
 };
 
 export function promptLabel(key: string): string {
